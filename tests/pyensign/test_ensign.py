@@ -109,8 +109,8 @@ class TestEnsign:
             Event(b'{"foo": "bar"}', MIME.APPLICATION_JSON),
             Event(b'{"bar": "bz"}', MIME.APPLICATION_JSON),
         ]
-
-        errors = await ensign.publish(name, events)
+        event_source = (event for event in events)
+        errors = await ensign.publish(name, event_source)
 
         # Ensure that the publish call was made with the correct topic ID
         args, _ = mock_publish.call_args
@@ -140,7 +140,8 @@ class TestEnsign:
             Event(b'{"foo": "bar"}', MIME.APPLICATION_JSON),
             Event(b'{"bar": "bz"}', MIME.APPLICATION_JSON),
         ]
-        errors = await ensign.publish(name, events)
+        event_source = (event for event in events)
+        errors = await ensign.publish(name, event_source)
 
         # Ensure that the publish call was made with the correct topic ID
         args, _ = mock_publish.call_args

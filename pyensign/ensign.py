@@ -77,7 +77,7 @@ class Ensign:
         else:
             self.topics = Cache()
 
-    async def publish(self, topic_name, *events, client_id=""):
+    async def publish(self, topic_name, event_source, client_id=""):
         """
         Publish events to an Ensign topic.
 
@@ -97,7 +97,7 @@ class Ensign:
         if topic_name == "":
             raise ValueError("topic_name is required")
 
-        if len(events) == 0:
+        if next(event_source, None) is None:
             raise ValueError("no events provided")
 
         if client_id == "":
@@ -113,12 +113,11 @@ class Ensign:
             topic_id = ULID.from_bytes(topic.id)
 
         # TODO: Support user-defined generators
-        def next():
-            for event in events:
-                yield event.proto()
+        event = next(event_source)
+        event_proto = event.proto()
 
         errors = []
-        async for rep in self.client.publish(topic_id, next()):
+        async for rep in self.client.publish(topic_id, event_proto):
             if isinstance(rep, ensign_pb2.Ack):
                 continue
             elif isinstance(rep, ensign_pb2.Nack):
